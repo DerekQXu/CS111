@@ -1,0 +1,23 @@
+NAME: Derek Xu
+EMAIL: derekqxu@g.ucla.edu
+ID: 704751588
+
+Description of included files:
+lab1a.c - single C source module that compiles cleanly (with no errors or warnings)
+Makefile - builds program with -Wall and -Wextra
+	supports: $make, $make dist, $make check
+README - identification, descr. of files, references
+
+References:
+Process API Reading from cs.ucla.edu/classes/spring18/cs111
+the man pages (termios, tcgetattr, tcsetattr, fork, waitpid, exec, pipe, kill, strerror, poll)
+Discussion Section
+https://www.gnu.org/software/libc/manual/html_mono/libc.html
+https://www.gnu.org/software/libc/manual/html_node/Noncanon-Example.html
+https://en.wikibooks.org/wiki/Serial_Programming/termios
+https://cboard.cprogramming.com/linux-programming/158476-termios-examples.html
+https://stackoverflow.com/questions/10008368/can-we-use-poll-function-with-unnamed-pipes?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+https://www.geeksforgeeks.org/c-program-demonstrate-fork-and-pipe/
+https://stackoverflow.com/questions/10008368/can-we-use-poll-function-with-unnamed-pipes?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+http://www.unixguide.net/unix/programming/2.1.2.shtml
+http://www.tutorialspoint.com/unix_system_calls/waitpid.htm

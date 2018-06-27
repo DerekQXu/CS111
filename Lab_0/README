@@ -1,0 +1,41 @@
+NAME: Derek Xu
+EMAIL: derekqxu@g.ucla.edu
+ID: 704751588
+
+Description of included files:
+lab0.c - the single C source module that compiles cleanly
+Makefile - the... makefile, as described in the spec
+    supports: $make, $make dist, $make check, $make clean
+backtrace.png - screenshot of segfault and assoc. stack-trace
+breakpoint - screenshot of breakpoint and var. inspection
+README - identification, descr. of files, descr. of smoke-test, references
+
+Brief description of smoke-test cases:
+1 data_comparison:
+checks if the command '$./lab0 --input=input.txt --output=output.txt' faithfully
+copies the contents of the input file into the output file
+2 segfault:
+checks if the command '$./lab0 --segfault' actually segmentation faults
+3 catch:
+checks if the command '$./lab0 --segfault' actually catches segmentation faults
+4 unreadable:
+checks if the command '$./lab0 --input=input.txt --output=output.txt' deals with
+unreadable input files in a correct way
+5 unwritable:
+checks if the command '$./lab0 --input=input.txt --output=output.txt' deals with
+unwritable output files in a correct way
+
+References:
+All the man pages (open, creat, close, dup, read, write, exit, signal, strerror, getopt, gdb)
+The links provided on the spec (web.cs.ucla.edu/classes/spring18/cs111)
+https://www.gnu.org/software/libc/manual/html_node/Getopot-Long-Option-Example.html
+https://stackoverflow.com/questions/7489093/getopt-long-proper-way-to-use-it
+https://www.systutorials.com/docs/linux/man/2-dup/
+https://www.linuxquestions.org/questions/programming-9/sigsegv-handler-segmentation-fauld-handler-277790/
+https://stackoverflow.com/questions/4493291/how-to-add-multi-line-comments-in-makefiles
+https://stackoverflow.com/questions/15977796/if-conditions-in-a-makefile-inside-a-target
+https://stackoverflow.com/questions/16315089/how-to-get-exit-status-of-a-shell-command-used-in-gnu-makefile
+https://stackoverflow.com/questions/35931866/is-conditional-statement-in-makefile-valid-syntax
+https://stackoverflow.com/questions/11004695/making-make-print-commands-before-executing-when-not-using-cmake
+Past Projects I completed from CS33 and CS35L
+Discussion Section

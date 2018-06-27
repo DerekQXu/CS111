@@ -1,0 +1,28 @@
+NAME: Derek Xu
+EMAIL: derekqxu@g.ucla.edu
+ID: 704751588
+SLIPDAYS: 1
+
+Description of included files:
+lab1b-client.c - single C source module that compiles cleanly (with no errors or warnings); client side of project
+lab1b-server.c - single C source module that compiles cleanly (with no errors or warnings); server side of project
+Makefile - builds program with -Wall and -Wextra
+	supports: $make, $make client, $make server, $make dist, $make check
+README - identification, descr. of files, references
+
+References:
+the man pages (socket and zlib)
+zlib pages on the spec page
+Piazza
+Discussion Section
+My own implementation of lab1a.c
+https://www.binarytides.com/server-client-example-c-sockets-linux/
+http://www.tutorialspoint.com/unix_sockets/socket_structures.htm
+http://www.tutorialspoint.com/unix_sockets/client_server_model.htm
+http://www.tutorialspoint.com/unix_sockets/socket_client_example.htm
+http://www.tutorialspoint.com/unix_sockets/socket_server_example.htm
+https://stackoverflow.com/questions/7540259/deflate-and-inflate-zlib-h-in-c
+https://stackoverflow.com/questions/1632201/error-deflate-and-inflate-with-zlib
+https://stackoverflow.com/questions/7367677/is-memset-more-efficient-than-for-loop-in-c
+https://stackoverflow.com/questions/42893519/zlib-deflateinit-always-returns-z-stream-error
+http://www.strudel.org.uk/itoa/

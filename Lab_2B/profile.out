@@ -1,0 +1,246 @@
+Total: 582 samples
+     515  88.5%  88.5%      582 100.0% list_func
+      55   9.5%  97.9%       55   9.5% __strcmp_sse42
+       9   1.5%  99.5%       44   7.6% SortedList_insert
+       2   0.3%  99.8%       23   4.0% SortedList_lookup
+       1   0.2% 100.0%        1   0.2% _init
+       0   0.0% 100.0%      582 100.0% __clone
+       0   0.0% 100.0%      582 100.0% start_thread
+ROUTINE ====================== list_func in /u/ee/ugrad/qiang/proj_4/lab2_list.c
+   515    582 Total samples (flat / cumulative)
+     .      .   44: int op_num;
+     .      .   45: long long dt_run_time;
+     .      .   46: long long dt_per_op;
+     .      .   47: long long dt_wait_for_lock = 0;
+     .      .   48: 
+---
+     .      .   49: void *list_func(void *cur_thread){
+     .      .   50:     int j, k, l;
+     .      .   51:     SortedListElement_t *temp;
+     .      .   52:     struct timespec start_wait_for_lock, end_wait_for_lock;
+     .      .   53:     int offset = *((int*) cur_thread) * iteration_num;
+     .      .   54:     // insert each key into list
+     .      .   55:     for (j = 0; j < iteration_num; ++j){
+     .      .   56:         if (mutex_flag){
+     .      .   57:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .   58:             pthread_mutex_lock(&mutex_list[key2hash[j+offset]]);
+     .      .   59:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   60:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   61:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   62:             pthread_mutex_unlock(&mutex_list[key2hash[j+offset]]);
+     .      .   63:         }
+     .      .   64:         else if (spin_lock_flag){
+     .      .   65:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+   394    394   66:             while (__sync_lock_test_and_set(&exclusion_list[key2hash[j+offset]], 1));
+     .      .   67:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   68:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .     44   69:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   70:             __sync_lock_release(&exclusion_list[key2hash[j+offset]]);
+     .      .   71:         }
+     .      .   72:         else {
+     .      .   73:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   74:         }
+     .      .   75:     }
+     .      .   76:     for(l = 0; l < list_num; ++l){
+     .      .   77:     // get list length
+     .      .   78:     if (mutex_flag){
+     .      .   79:         clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .   80:         pthread_mutex_lock(&mutex_list[l]);
+     .      .   81:         clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   82:         dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   83:         if (SortedList_length(list_list[l]) == -1){
+     .      .   84:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .   85:             exit(2);
+     .      .   86:         }
+     .      .   87:         pthread_mutex_unlock(&mutex_list[l]);
+     .      .   88:     }
+     .      .   89:     else if (spin_lock_flag){
+     .      .   90:         clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     1      1   91:         while (__sync_lock_test_and_set(&exclusion_list[l], 1));
+     .      .   92:         clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   93:         dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   94:         if (SortedList_length(list_list[l]) == -1){
+     .      .   95:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .   96:             exit(2);
+     .      .   97:         }
+     .      .   98:         __sync_lock_release(&exclusion_list[l]);
+     .      .   99:     }
+     .      .  100:     else {
+     .      .  101:         if (SortedList_length(list_list[l]) == -1){
+     .      .  102:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .  103:             exit(2);
+     .      .  104:         }
+     .      .  105:     }
+     .      .  106:     }
+     .      .  107:     // look up + delete each key
+     .      .  108:     for (k = 0; k < iteration_num; ++k){
+     .      .  109:         if (mutex_flag){
+     .      .  110:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .  111:             pthread_mutex_lock(&mutex_list[key2hash[k+offset]]);
+     .      .  112:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .  113:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .  114:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key);
+     .      .  115:             if (temp == NULL){
+     .      .  116:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  117:                 exit(2);
+     .      .  118:             }
+     .      .  119:             if (SortedList_delete(temp)){
+     .      .  120:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  121:                 exit(2);
+     .      .  122:             }
+     .      .  123:             pthread_mutex_unlock(&mutex_list[key2hash[k+offset]]);
+     .      .  124:         }
+     .      .  125:         else if (spin_lock_flag){
+     .      .  126:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+   120    120  127:             while (__sync_lock_test_and_set(&exclusion_list[key2hash[k+offset]], 1));
+     .      .  128:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .  129:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .     23  130:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key);
+     .      .  131:             if (temp == NULL){
+     .      .  132:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  133:                 exit(2);
+     .      .  134:             }
+     .      .  135:             if (SortedList_delete(temp)){
+     .      .  136:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  137:                 exit(2);
+     .      .  138:             }
+     .      .  139:             __sync_lock_release(&exclusion_list[key2hash[k+offset]]);
+     .      .  140:         }
+     .      .  141:         else {
+     .      .  142:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key); if (temp == NULL){
+     .      .  143:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  144:                 exit(2);
+     .      .  145:             }
+     .      .  146:             if (SortedList_delete(temp)){
+     .      .  147:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  148:                 exit(2);
+     .      .  149:             }
+     .      .  150:         }
+     .      .  151:     }
+     .      .  152:     return 0;
+     .      .  153: }
+---
+     .      .  154: 
+     .      .  155: //Hashing function
+     .      .  156: int hash_func(const char *key){
+     .      .  157: 	return ((int) *key) % list_num; 
+     .      .  158: }
+ROUTINE ====================== list_func in /u/ee/ugrad/qiang/proj_4/lab2_list.c
+   515    582 Total samples (flat / cumulative)
+     .      .   44: int op_num;
+     .      .   45: long long dt_run_time;
+     .      .   46: long long dt_per_op;
+     .      .   47: long long dt_wait_for_lock = 0;
+     .      .   48: 
+---
+     .      .   49: void *list_func(void *cur_thread){
+     .      .   50:     int j, k, l;
+     .      .   51:     SortedListElement_t *temp;
+     .      .   52:     struct timespec start_wait_for_lock, end_wait_for_lock;
+     .      .   53:     int offset = *((int*) cur_thread) * iteration_num;
+     .      .   54:     // insert each key into list
+     .      .   55:     for (j = 0; j < iteration_num; ++j){
+     .      .   56:         if (mutex_flag){
+     .      .   57:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .   58:             pthread_mutex_lock(&mutex_list[key2hash[j+offset]]);
+     .      .   59:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   60:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   61:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   62:             pthread_mutex_unlock(&mutex_list[key2hash[j+offset]]);
+     .      .   63:         }
+     .      .   64:         else if (spin_lock_flag){
+     .      .   65:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+   394    394   66:             while (__sync_lock_test_and_set(&exclusion_list[key2hash[j+offset]], 1));
+     .      .   67:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   68:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .     44   69:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   70:             __sync_lock_release(&exclusion_list[key2hash[j+offset]]);
+     .      .   71:         }
+     .      .   72:         else {
+     .      .   73:             SortedList_insert(list_list[key2hash[j+offset]], &list_elements[j + offset]);
+     .      .   74:         }
+     .      .   75:     }
+     .      .   76:     for(l = 0; l < list_num; ++l){
+     .      .   77:     // get list length
+     .      .   78:     if (mutex_flag){
+     .      .   79:         clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .   80:         pthread_mutex_lock(&mutex_list[l]);
+     .      .   81:         clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   82:         dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   83:         if (SortedList_length(list_list[l]) == -1){
+     .      .   84:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .   85:             exit(2);
+     .      .   86:         }
+     .      .   87:         pthread_mutex_unlock(&mutex_list[l]);
+     .      .   88:     }
+     .      .   89:     else if (spin_lock_flag){
+     .      .   90:         clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     1      1   91:         while (__sync_lock_test_and_set(&exclusion_list[l], 1));
+     .      .   92:         clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .   93:         dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .   94:         if (SortedList_length(list_list[l]) == -1){
+     .      .   95:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .   96:             exit(2);
+     .      .   97:         }
+     .      .   98:         __sync_lock_release(&exclusion_list[l]);
+     .      .   99:     }
+     .      .  100:     else {
+     .      .  101:         if (SortedList_length(list_list[l]) == -1){
+     .      .  102:             fprintf(stderr, "Corrupted list! LENGTH (%s)\n", strerror(errno));
+     .      .  103:             exit(2);
+     .      .  104:         }
+     .      .  105:     }
+     .      .  106:     }
+     .      .  107:     // look up + delete each key
+     .      .  108:     for (k = 0; k < iteration_num; ++k){
+     .      .  109:         if (mutex_flag){
+     .      .  110:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+     .      .  111:             pthread_mutex_lock(&mutex_list[key2hash[k+offset]]);
+     .      .  112:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .  113:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .      .  114:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key);
+     .      .  115:             if (temp == NULL){
+     .      .  116:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  117:                 exit(2);
+     .      .  118:             }
+     .      .  119:             if (SortedList_delete(temp)){
+     .      .  120:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  121:                 exit(2);
+     .      .  122:             }
+     .      .  123:             pthread_mutex_unlock(&mutex_list[key2hash[k+offset]]);
+     .      .  124:         }
+     .      .  125:         else if (spin_lock_flag){
+     .      .  126:             clock_gettime(CLOCK_MONOTONIC, &start_wait_for_lock); /* mark start time */
+   120    120  127:             while (__sync_lock_test_and_set(&exclusion_list[key2hash[k+offset]], 1));
+     .      .  128:             clock_gettime(CLOCK_MONOTONIC, &end_wait_for_lock);/* mark the end time */
+     .      .  129:             dt_wait_for_lock += BILLION * (end_wait_for_lock.tv_sec - start_wait_for_lock.tv_sec) + end_wait_for_lock.tv_nsec - start_wait_for_lock.tv_nsec;
+     .     23  130:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key);
+     .      .  131:             if (temp == NULL){
+     .      .  132:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  133:                 exit(2);
+     .      .  134:             }
+     .      .  135:             if (SortedList_delete(temp)){
+     .      .  136:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  137:                 exit(2);
+     .      .  138:             }
+     .      .  139:             __sync_lock_release(&exclusion_list[key2hash[k+offset]]);
+     .      .  140:         }
+     .      .  141:         else {
+     .      .  142:             temp = SortedList_lookup(list_list[key2hash[k+offset]], list_elements[k + offset].key); if (temp == NULL){
+     .      .  143:                 fprintf(stderr, "Corrupted list! FIND (%s)\n", strerror(errno));
+     .      .  144:                 exit(2);
+     .      .  145:             }
+     .      .  146:             if (SortedList_delete(temp)){
+     .      .  147:                 fprintf(stderr, "Corrupted list! DELETE (%s)\n", strerror(errno));
+     .      .  148:                 exit(2);
+     .      .  149:             }
+     .      .  150:         }
+     .      .  151:     }
+     .      .  152:     return 0;
+     .      .  153: }
+---
+     .      .  154: 
+     .      .  155: //Hashing function
+     .      .  156: int hash_func(const char *key){
+     .      .  157: 	return ((int) *key) % list_num; 
+     .      .  158: }

@@ -1,0 +1,86 @@
+NAME: Derek Xu
+EMAIL: derekqxu@g.ucla.edu
+ID: 704751588
+
+Description of included files:
+SortedList.h - provided header file for SortedList that compiles cleanly with no errors
+SortedList.c - implementation of SortedList that compiles cleanly with no errors
+lab2_list.c - source C program that compiles cleanly with no errors
+	options: threads iterations yield(idl) sync(m,s) lists
+Makefile - Compiles and runs the project; supports following options:
+	build, tests, profile, graphs, dist, clean	
+lab2b_list.csv - generated output for lab2b_list.c test results (see Makefile)
+profile.out - output data from gprof tool
+lab2b_[1-5].png - gnuplots of the lab2_list.c test results (see Makefile)
+lab2b_list.gp (other files/ scripts) - gnuplot implementation to make lab2b_[1-5].png
+	supports all 5 graphs mentioned in spec
+README - description of files and answers to questions
+
+Questions:
+2.3.1
+	For 1-2 thread list tests, it really depends on the test we are conducting:
+	1 thread spinlock
+		list operation: in 1 thread tests we have low hardware contention, and the
+		spin lock is a relatively light command, thus less expensive 
+	1 thread mutex (heavy instruction)
+		list operation: in 1 thread tests we have low hardware contention, and the
+		mutex is a relatively heavy command, thus more expensive. Due to an extremely
+		small amount of contention, the cycles go mainly to the list operations
+		(testing confirms this!!), i.e. the mutex's are barely if not ever used.
+	2 thread spinlock
+		kind of half and half: in 2 thread tests we have a little more hardware
+		contention, but the spin lock is still relatively cheap. It is likely that the
+		cycles are spent half in locking and half in list operations as locking is
+		running the same time as list operations
+	2 thread mutex
+		In 2 thread tests we have more hardware contention, and the mutex is a
+		relatively heavy command, thus more expensive. i.e. the overhead of the mutex
+		may trump the list operation time, depedning on the size of the list: 
+			list size is large: list operation
+			list size is small: mutex overhead trumps others
+		i.e. we need lots of threads and large lists  to see the benefits of mutex
+	High-thread count spin locks will result in most of the time falling into spinning.
+	This is due to the high contention of the CPU.
+	High-thread count mutex will result in most of the time falling into list operations.
+	This is due to mutex's ability to confront high contention of the CPU.
+2.3.2
+	The lines of code consumes most of the cycles in the spin-lock version is where the
+	following is called (for large number of threads):
+	66,91 while (__sync_lock_test_and_set(&exclusion_list[l], 1));
+	This is because there is high contention, and the spin-lock will waste cycles here.
+	The processes is never put wait state and is constantly spinning/wasting time. This
+	is especially apparent in insert and delete, as we have more contention for these
+	commands compared to the others (observe the structure of the for loops).
+2.3.3
+	The average lock-wait time rises so dramatically because the threads are all running
+	in parallel and there is high contention for the locks. In other words, multiple
+	threads can be waiting for a lock and one instance in time. This also causes the
+	completion time per operation to rise. completion time per op rises slower because
+	it is more serializaed i.e. we can only execute one serial instruction at a time.
+	This also explains why the wait time per operation goes up faster than the completion
+	time per operation (we are waiting on multiple CPUs in parallel). Finally, in our
+	computation of time per operation we assume we have 3 * # of iterations * # of
+	threads. But deletion is an O(1) implementation. Though, the equation was given in
+	the spec, so it is arguable how much this specificity affect our outcomes.
+2.3.4
+	We are dividing the lists and locks up... This allows greater parallelism in our
+	program as no longer does 1 thread need to wait for another thread to finish its
+	list operation before the 1st thread can continue. The throughput will GENERALLY
+	increase as the number of lists is increased but there are strict limits. If we
+	have more lists than list elements, then the parallelism will reach a threshold
+	and may even detract through bad resource allocation the time it takes. Furthermore,
+	it is NOT reasonable that N-way partitioned list has throughput equivalent to (1/N)
+	threads. This is because we are limited by the number of CPU cores on our machine.
+	We cannot reach true parallelism in a 1 core system even if we divide up our lists,
+	thus the stated law breaks down here. Other factors play a role too, such as our
+	hashing function and the "randomness" of the random keys we generate.
+
+References:
+previous projects
+lectures
+discussion
+project specifications
+man pages of functions on the spec sheet
+https://unix.stackexchange.com/questions/120831/grep-for-range-of-numbers
+https://www.cyberciti.biz/faq/grep-regular-expressions/
+https://stackoverflow.com/questions/26636570/using-pprof-with-gperftools-resulting-in-curl-error 
