@@ -1,0 +1,15 @@
+NAME: Derek Xu
+EMAIL: derekqxu@g.ucla.edu
+ID: 704751588
+
+Description of included files:
+my_beaglebone.jpg - picture of Beaglebone.
+connected.png - USB terminal command session showing my name and configured network access.
+copy.png - local session with a copied hello world program from my laptop to my Beaglebone.
+build_run.png - WIFI SSH session in which I build and run a trivial (hello world) program.
+git.png - WIFI SSH session in which I install git and clone a repository.
+README file - description of the above files, WiFi, MAC, and Serial Number.
+
+Serial Number: BBGW17051847
+WiFi Address: 172.20.10.5
+MAC Address: 2CF7F10666C5

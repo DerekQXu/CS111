@@ -1,0 +1,16 @@
+NAME: Derek Xu,Harry Yee
+EMAIL: derekqxu@g.ucla.edu,hyee1234@gmail.com
+ID: 704751588,704754172
+
+Description of Included Files:
+lab3a.c - C source file for file system information processing; builds and runs with no errors
+Makefile - builds and tests operation:
+	default/build... builds program with -Wall and -Wextra
+    clean... cleans the directory
+	dist... creates a deliverable tarball
+README - descriptions of each file, and additional contents
+
+References:
+man pages provided + spec
+Piazza
+Lecture + Discussion
